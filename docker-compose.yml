@@ -1,0 +1,41 @@
+version: '3.3'
+
+services:
+  flask_app:
+      build:
+        context: .
+        dockerfile: Dockerfile
+      ports:
+        - "5001:5001"
+      environment:
+        - FLASK_RUN_HOST=0.0.0.0
+      depends_on:
+        - database
+
+  database:
+    image: postgres
+    ports:
+      - "5432:5432"
+    restart: always
+    container_name: postgres-HMS
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=1234
+      - POSTGRES_DB=HMS
+    volumes:
+      - ./sql/schema.sql:/docker-entrypoint-initdb.d/1-schema.sql
+      - ./sql/keys.sql:/docker-entrypoint-initdb.d/2-keys.sql
+      - ./sql/data.sql:/docker-entrypoint-initdb.d/3-data.sql
+      - ./sql/views.sql:/docker-entrypoint-initdb.d/4-views.sql
+      - ./sql/queries.sql:/docker-entrypoint-initdb.d/5-queries.sql
+      - ./sql/procedure.sql:/docker-entrypoint-initdb.d/6-procedure.sql
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8080:8080
+    depends_on:
+      - database
+
+  
